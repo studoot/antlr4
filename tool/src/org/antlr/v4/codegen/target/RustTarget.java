@@ -12,14 +12,8 @@ import java.util.Set;
 import org.antlr.v4.codegen.CodeGenerator;
 import org.antlr.v4.codegen.Target;
 import org.antlr.v4.codegen.UnicodeEscapes;
-// import org.antlr.v4.tool.ErrorType;
 import org.antlr.v4.tool.ast.GrammarAST;
-// import org.stringtemplate.v4.NumberRenderer;
-// import org.stringtemplate.v4.STErrorListener;
 import org.stringtemplate.v4.STGroup;
-// import org.stringtemplate.v4.STGroupFile;
-import org.stringtemplate.v4.StringRenderer;
-// import org.stringtemplate.v4.misc.STMessage;
 
 public class RustTarget extends Target {
 
@@ -77,7 +71,6 @@ public class RustTarget extends Target {
 	@Override
 	protected STGroup loadTemplates() {
 		STGroup result = super.loadTemplates();
-		result.registerRenderer(String.class, new StringRenderer(), true);
 		return result;
 	}
 
