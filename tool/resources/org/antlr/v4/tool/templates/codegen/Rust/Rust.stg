@@ -1335,7 +1335,7 @@ _prevctx = localctx
 >>
 
 LexerFile(lexerFile, lexer, namedActions) ::= <<
-#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal))]
+#![cfg_attr(feature = "cargo-clippy", allow(unreadable_literal, non_camel_case_types))]
 <fileHeader(lexerFile.grammarFileName, lexerFile.ANTLRVersion)>
 
 // extern crate antlr4-runtime;
@@ -1353,55 +1353,50 @@ use std::vec::Vec;
 
 Lexer(lexer, atn, actionFuncs, sempredFuncs, superClass) ::= <<
 <if(atn)>
-const SERIALIZED_LEXER_ATN:<atn>;
+const SERIALIZED_ATN:<atn>;
 <else>
-static mut SERIALIZED_LEXER_ATN: Vec<u16>;
+static mut SERIALIZED_ATN: Vec<u16>;
 <endif>
 
 /*
 var lexerDeserializer = antlr.NewATNDeserializer(nil)
 var lexerAtn = lexerDeserializer.DeserializeFromUInt16(serializedLexerAtn)
 */
-const LEXER_CHANNEL_NAMES:[&'static str;<if (lexer.channels)>2+<length(lexer.channels)><else>2<endif>] = [
+const CHANNEL_NAMES:[&'static str;<if (lexer.channels)>2+<length(lexer.channels)><else>2<endif>] = [
     "DEFAULT_TOKEN_CHANNEL", "HIDDEN"<if (lexer.channels)>,<lexer.channels:{c | "<c>"}; separator=",", wrap><endif>,
 ];
 
-const LEXER_MODE_NAMES:[&'static str;<length(lexer.modes)>] = [
+const MODE_NAMES:[&'static str;<length(lexer.modes)>] = [
     <lexer.modes:{m | "<m>"}; separator=",", wrap>,
 ];
 
 <if(lexer.literalNames)>
-const LEXER_LITERAL_NAMES:[&'static str;<length(lexer.literalNames)>] = [
+const LITERAL_NAMES:[&'static str;<length(lexer.literalNames)>] = [
     <lexer.literalNames; null="\"\"", separator=",", wrap>,
 ];
 <else>
-var LEXER_LITERAL_NAMES []string
+var LITERAL_NAMES []string
 <endif>
 
 
 <if(lexer.symbolicNames)>
-const LEXER_SYMBOLIC_NAMES:[&'static str;<length(lexer.symbolicNames)>] = [
+const SYMBOLIC_NAMES:[&'static str;<length(lexer.symbolicNames)>] = [
     <lexer.symbolicNames; null="\"\"", separator=",", wrap>,
 ];
 <else>
-var LEXER_SYMBOLIC_NAMES []string
+var SYMBOLIC_NAMES []string
 <endif>
 
 
 <if(lexer.ruleNames)>
-const LEXER_RULE_NAMES:[&'static str;<length(lexer.ruleNames)>] = [
+const RULE_NAMES:[&'static str;<length(lexer.ruleNames)>] = [
     <lexer.ruleNames:{r | "<r>"}; separator=",", wrap>,
 ];
 <else>
-var LEXER_RULE_NAMES []string
+var RULE_NAMES []string
 <endif>
 
-
-type <lexer.name> struct {
-	*<if(superClass)><superClass><else>antlr.BaseLexer<endif>
-	channelNames []string
-	modeNames []string
-	// TODO: EOF string
+struct <lexer.name> {
 }
 /*
 var lexerDecisionToDFA = make([]*antlr.DFA, len(lexerAtn.DecisionToState))
@@ -1429,42 +1424,32 @@ func New<lexer.name>(input antlr.CharStream) *<lexer.name> {
 
     return l
 }
-<if(rest(lexer.tokens))>
+*/
+<if(lexer.tokens)>
 
 // <lexer.name> tokens.
-const (
-    <lexer.tokens:{k | <lexer.name><k> = <lexer.tokens.(k)>}; separator="\n">
-)
-<elseif(lexer.tokens)>
-
-// <lexer.name><first(lexer.tokens)> is the <lexer.name> token.
-const <lexer.name><first(lexer.tokens)> = <lexer.tokens.(first(lexer.tokens))>
+enum Tokens {
+    <lexer.tokens:{k | <k> = <lexer.tokens.(k)>}; separator=",\n">
+}
 <endif>
 
-<if(rest(lexer.channels))>
+<if(lexer.channels)>
 
 // <lexer.name> channels.
-const (
-    <lexer.channels:{c | <lexer.name><c> = <lexer.channels.(c)>}; separator="\n">
-)
-<elseif(lexer.channels)>
-
-// <lexer.name><first(lexer.channels)> is the <lexer.name> channel.
-const <lexer.name><first(lexer.channels)> = <lexer.channels.(first(lexer.channels))>
+enum Channels {
+    <lexer.channels:{c | <c> = <lexer.channels.(c)>}; separator=",\n">
+}
 <endif>
 
-<if(rest(rest(lexer.modes)))>
+<if(rest(lexer.modes))>
 
 // <lexer.name> modes.
-const (
-    <first(rest(lexer.modes)):{m | <lexer.name><m> = iota + 1}>
-    <rest(rest(lexer.modes)):{m | <lexer.name><m>}; separator="\n">
-)
-<elseif(rest(lexer.modes))>
-
-// <lexer.name><first(rest(lexer.modes))> is the <lexer.name> mode.
-const <lexer.name><first(rest(lexer.modes))> = 1
+enum Modes {
+    <rest(lexer.modes):{m | <m> = <i>}; separator=",\n">
+}
 <endif>
+
+/*
 <if(namedActions.members)>
 
 <namedActions.members>
